@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard · Soulfit Academia</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde: #1A3C34;
+    --verde-m: #2E6B5E;
+    --verde-c: #4CAF8A;
+    --verde-s: #EAF5F0;
+    --accent: #F5A623;
+    --risco: #E74C3C;
+    --risco-s: #FDEDEC;
+    --texto: #1A1A1A;
+    --texto-s: #555;
+    --borda: #E8E8E8;
+    --bg: #F7F9F8;
+    --card: #FFFFFF;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--texto); min-height: 100vh; }
+
+  .header {
+    background: linear-gradient(135deg, var(--verde) 0%, var(--verde-m) 100%);
+    padding: 24px 20px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: ''; position: absolute; top: -40px; right: -40px;
+    width: 200px; height: 200px; border-radius: 50%;
+    background: rgba(76,175,138,0.15);
+  }
+  .header::after {
+    content: ''; position: absolute; bottom: -60px; left: 20px;
+    width: 140px; height: 140px; border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+  }
+  .header-brand { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--verde-c); margin-bottom: 8px; }
+  .header-title { font-size: 22px; font-weight: 700; color: #fff; line-height: 1.2; margin-bottom: 4px; }
+  .header-sub { font-size: 13px; color: rgba(255,255,255,0.65); margin-bottom: 16px; }
+  .header-periodo {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px; padding: 5px 14px; font-size: 12px; color: #fff; font-weight: 500;
+  }
+
+  .tabs {
+    display: flex; background: #fff; border-bottom: 2px solid var(--borda);
+    overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex: none; padding: 14px 20px; font-size: 13px; font-weight: 600;
+    color: var(--texto-s); cursor: pointer; border-bottom: 2px solid transparent;
+    margin-bottom: -2px; white-space: nowrap; transition: all 0.2s;
+  }
+  .tab.active { color: var(--verde-m); border-bottom-color: var(--verde-m); }
+
+  .content { padding: 16px; max-width: 600px; margin: 0 auto; }
+  .section { display: none; }
+  .section.active { display: block; animation: fadeIn 0.3s ease; }
+
+  .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .kpi-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+  .kpi {
+    background: var(--card); border-radius: 14px; padding: 16px;
+    border: 1px solid var(--borda); position: relative; overflow: hidden;
+  }
+  .kpi::before {
+    content: ''; position: absolute; top: 0; left: 0;
+    width: 4px; height: 100%; background: var(--verde-c);
+    border-radius: 14px 0 0 14px;
+  }
+  .kpi.risco::before { background: var(--risco); }
+  .kpi.accent::before { background: var(--accent); }
+  .kpi-label { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--texto-s); margin-bottom: 6px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--verde); line-height: 1; margin-bottom: 4px; font-family: 'DM Mono', monospace; }
+  .kpi.risco .kpi-value { color: var(--risco); }
+  .kpi.accent .kpi-value { color: var(--accent); }
+  .kpi-delta { font-size: 11px; font-weight: 500; color: var(--texto-s); }
+  .delta-up { color: #27AE60; }
+  .delta-down { color: var(--risco); }
+
+  .sec-title {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--verde-m); margin: 20px 0 10px; display: flex; align-items: center; gap: 8px;
+  }
+  .sec-title::after { content: ''; flex: 1; height: 1px; background: var(--borda); }
+
+  .card { background: var(--card); border-radius: 14px; border: 1px solid var(--borda); padding: 16px; margin-bottom: 12px; }
+  .card-title { font-size: 13px; font-weight: 600; color: var(--verde); margin-bottom: 12px; }
+
+  .barra-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .barra-label { font-size: 11px; color: var(--texto-s); width: 90px; flex-shrink: 0; }
+  .barra-wrap { flex: 1; }
+  .barra-bg { height: 8px; background: var(--borda); border-radius: 4px; overflow: hidden; margin-bottom: 2px; }
+  .barra-fill { height: 100%; border-radius: 4px; }
+  .barra-val { font-size: 10px; color: var(--texto-s); font-family: 'DM Mono', monospace; }
+
+  .donut-wrap { display: flex; align-items: center; gap: 20px; }
+  .donut-legenda { flex: 1; }
+  .legenda-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 12px; }
+  .legenda-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .legenda-nome { color: var(--texto-s); flex: 1; }
+  .legenda-pct { font-weight: 700; color: var(--texto); font-family: 'DM Mono', monospace; }
+
+  .plano-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--borda); }
+  .plano-row:last-child { border-bottom: none; }
+  .plano-nome { font-size: 12px; color: var(--texto); font-weight: 500; }
+  .plano-vals { display: flex; gap: 8px; align-items: center; }
+  .plano-val { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--texto-s); }
+  .plano-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+  .badge-up { background: #E8F8F0; color: #27AE60; }
+  .badge-down { background: var(--risco-s); color: var(--risco); }
+
+  .alerta {
+    background: var(--risco-s); border: 1px solid #FADBD8; border-radius: 12px;
+    padding: 14px; margin-bottom: 10px; display: flex; gap: 10px;
+  }
+  .alerta-icon { font-size: 18px; flex-shrink: 0; }
+  .alerta-titulo { font-size: 12px; font-weight: 700; color: var(--risco); margin-bottom: 2px; }
+  .alerta-texto { font-size: 11px; color: #7B241C; line-height: 1.4; }
+
+  .positivo {
+    background: var(--verde-s); border: 1px solid #C8E6C9; border-radius: 12px;
+    padding: 14px; margin-bottom: 10px; display: flex; gap: 10px;
+  }
+  .positivo-titulo { font-size: 12px; font-weight: 700; color: var(--verde-m); margin-bottom: 2px; }
+  .positivo-texto { font-size: 11px; color: var(--verde); line-height: 1.4; }
+
+  .faixa-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .faixa-label { font-size: 11px; color: var(--texto-s); width: 60px; flex-shrink: 0; }
+  .faixa-barra { flex: 1; height: 24px; background: var(--borda); border-radius: 6px; overflow: hidden; }
+  .faixa-fill { height: 100%; border-radius: 6px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; }
+  .faixa-pct { font-size: 10px; font-weight: 700; color: #fff; font-family: 'DM Mono', monospace; }
+  .faixa-n { font-size: 11px; color: var(--texto-s); width: 36px; text-align: right; font-family: 'DM Mono', monospace; }
+
+  .comp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .comp-card { background: var(--bg); border-radius: 10px; padding: 12px; text-align: center; }
+  .comp-mes { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--texto-s); margin-bottom: 4px; }
+  .comp-val { font-size: 20px; font-weight: 700; color: var(--verde); font-family: 'DM Mono', monospace; }
+  .comp-sub { font-size: 10px; color: var(--texto-s); margin-top: 2px; }
+
+  .footer { text-align: center; padding: 20px 16px; font-size: 10px; color: var(--texto-s); border-top: 1px solid var(--borda); margin-top: 20px; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-brand">Ecossistema IA Fitness™ · Consultor Sherley Ferreira</div>
+  <div class="header-title">Soulfit Academia</div>
+  <div class="header-sub">Dashboard de Desempenho · Gestora: Wanessa</div>
+  <div class="header-periodo">📅 Fevereiro × Março 2026</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('financeiro', this)">💰 Financeiro</div>
+  <div class="tab" onclick="showTab('evasao', this)">📉 Evasão</div>
+  <div class="tab" onclick="showTab('perfil', this)">👥 Perfil</div>
+  <div class="tab" onclick="showTab('alertas', this)">🚨 Alertas</div>
+</div>
+
+<div class="content">
+
+  <!-- TAB FINANCEIRO -->
+  <div class="section active" id="financeiro">
+    <div class="sec-title">Receita Geral</div>
+    <div class="comp-row">
+      <div class="comp-card">
+        <div class="comp-mes">Fevereiro</div>
+        <div class="comp-val">R$37.306</div>
+        <div class="comp-sub">413 contratos</div>
+      </div>
+      <div class="comp-card">
+        <div class="comp-mes">Março</div>
+        <div class="comp-val" style="color:var(--risco)">R$36.289</div>
+        <div class="comp-sub">415 contratos ▼ -2,7%</div>
+      </div>
+    </div>
+
+    <div class="kpi-grid three">
+      <div class="kpi risco">
+        <div class="kpi-label">Variação</div>
+        <div class="kpi-value" style="font-size:18px">-2,7%</div>
+        <div class="kpi-delta delta-down">queda em mar</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Ticket Médio</div>
+        <div class="kpi-value" style="font-size:16px">R$126</div>
+        <div class="kpi-delta">por aluno</div>
+      </div>
+      <div class="kpi accent">
+        <div class="kpi-label">Total 2 meses</div>
+        <div class="kpi-value" style="font-size:16px">R$73,6k</div>
+        <div class="kpi-delta">fev + mar</div>
+      </div>
+    </div>
+
+    <div class="sec-title">Receita por Plano</div>
+    <div class="card">
+      <div class="plano-row">
+        <div class="plano-nome">Básico (Horário livre)</div>
+        <div class="plano-vals">
+          <div class="plano-val">R$22.592</div>
+          <div class="plano-badge badge-up">+18,4%</div>
+        </div>
+      </div>
+      <div class="plano-row">
+        <div class="plano-nome">Plano VIP (Anual)</div>
+        <div class="plano-vals">
+          <div class="plano-val">R$7.012</div>
+          <div class="plano-badge badge-down">-35,9%</div>
+        </div>
+      </div>
+      <div class="plano-row">
+        <div class="plano-nome">Plano Platinum (Trimestral)</div>
+        <div class="plano-vals">
+          <div class="plano-val">R$4.164</div>
+          <div class="plano-badge badge-up">+25,3%</div>
+        </div>
+      </div>
+      <div class="plano-row">
+        <div class="plano-nome">Plano Master (Semestral)</div>
+        <div class="plano-vals">
+          <div class="plano-val">R$2.400</div>
+          <div class="plano-badge badge-down">-34,2%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-title">Forma de Pagamento (Março)</div>
+    <div class="card">
+      <div class="barra-row">
+        <div class="barra-label">Cartão crédito</div>
+        <div class="barra-wrap">
+          <div class="barra-bg"><div class="barra-fill" style="width:35%;background:var(--verde-m)"></div></div>
+          <div class="barra-val">35,5% ▼ era 43% em fev</div>
+        </div>
+      </div>
+      <div class="barra-row">
+        <div class="barra-label">Pix</div>
+        <div class="barra-wrap">
+          <div class="barra-bg"><div class="barra-fill" style="width:38%;background:var(--verde-c)"></div></div>
+          <div class="barra-val">38,6% ▲ crescendo</div>
+        </div>
+      </div>
+      <div class="barra-row">
+        <div class="barra-label">Dinheiro</div>
+        <div class="barra-wrap">
+          <div class="barra-bg"><div class="barra-fill" style="width:16%;background:#95A5A6"></div></div>
+          <div class="barra-val">16,4%</div>
+        </div>
+      </div>
+      <div class="barra-row">
+        <div class="barra-label">Boleto</div>
+        <div class="barra-wrap">
+          <div class="barra-bg"><div class="barra-fill" style="width:7%;background:var(--risco)"></div></div>
+          <div class="barra-val">7,2% ⚠️ quase dobrou vs fev</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-title">Novos Clientes — Fevereiro</div>
+    <div class="card">
+      <div class="barra-row">
+        <div class="barra-label">Básico</div>
+        <div class="barra-wrap">
+          <div class="barra-bg"><div class="barra-fill" style="width:50%;background:var(--risco)"></div></div>
+          <div class="barra-val">50% dos novos — plano de menor ticket</div>
+        </div>
+      </div>
+      <div class="barra-row">
+        <div class="barra-label">Platinum</div>
+        <div class="barra-wrap">
+          <div class="barra-bg"><div class="barra-fill" style="width:22%;background:var(--verde-m)"></div></div>
+          <div class="barra-val">22,2%</div>
+        </div>
+      </div>
+      <div class="barra-row">
+        <div class="barra-label">VIP Anual</div>
+        <div class="barra-wrap">
+          <div class="barra-bg"><div class="barra-fill" style="width:8%;background:var(--verde-c)"></div></div>
+          <div class="barra-val">8,3% — apenas 3 novos no plano premium</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB EVASÃO -->
+  <div class="section" id="evasao">
+    <div class="sec-title">Visão Geral</div>
+    <div class="comp-row">
+      <div class="comp-card">
+        <div class="comp-mes">Fevereiro</div>
+        <div class="comp-val" style="color:var(--risco)">98</div>
+        <div class="comp-sub">encerrados · 31,6% ⚠️</div>
+      </div>
+      <div class="comp-card">
+        <div class="comp-mes">Março</div>
+        <div class="comp-val" style="color:var(--risco)">83</div>
+        <div class="comp-sub">encerrados · 29,2% ▼</div>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi risco">
+        <div class="kpi-label">Retenção Fev</div>
+        <div class="kpi-value">68,4%</div>
+        <div class="kpi-delta delta-down">meta: ≥ 90%</div>
+      </div>
+      <div class="kpi risco">
+        <div class="kpi-label">Retenção Mar</div>
+        <div class="kpi-value">70,8%</div>
+        <div class="kpi-delta delta-down">ainda crítico</div>
+      </div>
+      <div class="kpi accent">
+        <div class="kpi-label">Receita em Risco</div>
+        <div class="kpi-value" style="font-size:18px">R$27,9k</div>
+        <div class="kpi-delta">2 meses somados</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Recuperação</div>
+        <div class="kpi-value" style="color:var(--verde-c)">65,9%</div>
+        <div class="kpi-delta delta-up">acima da meta 20%</div>
+      </div>
+    </div>
+
+    <div class="sec-title">Movimentação de Contratos</div>
+    <div class="card">
+      <div class="plano-row">
+        <div class="plano-nome">Novas adesões</div>
+        <div class="plano-vals">
+          <div class="plano-val">44 → 46</div>
+          <div class="plano-badge badge-up">+2</div>
+        </div>
+      </div>
+      <div class="plano-row">
+        <div class="plano-nome">Retornos (reativações)</div>
+        <div class="plano-vals">
+          <div class="plano-val">23 → 29</div>
+          <div class="plano-badge badge-up">+6</div>
+        </div>
+      </div>
+      <div class="plano-row">
+        <div class="plano-nome">Renovações</div>
+        <div class="plano-vals">
+          <div class="plano-val">222 → 247</div>
+          <div class="plano-badge badge-up">+25</div>
+        </div>
+      </div>
+      <div class="plano-row">
+        <div class="plano-nome">Encerrados</div>
+        <div class="plano-vals">
+          <div class="plano-val">98 → 83</div>
+          <div class="plano-badge badge-up">-15 ✓</div>
+        </div>
+      </div>
+      <div class="plano-row">
+        <div class="plano-nome">Saldo líquido</div>
+        <div class="plano-vals">
+          <div class="plano-val">-31 → +8</div>
+          <div class="plano-badge badge-up">reverteu</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-title">Alunos Inativos — Situação Atual</div>
+    <div class="card">
+      <div class="barra-row">
+        <div class="barra-label">+7 dias</div>
+        <div class="barra-wrap">
+          <div class="barra-bg"><div class="barra-fill" style="width:70%;background:var(--accent)"></div></div>
+          <div class="barra-val">44 alunos — ação esta semana</div>
+        </div>
+      </div>
+      <div class="barra-row">
+        <div class="barra-label">+14 dias</div>
+        <div class="barra-wrap">
+          <div class="barra-bg"><div class="barra-fill" style="width:27%;background:#E67E22"></div></div>
+          <div class="barra-val">17 alunos — ação urgente</div>
+        </div>
+      </div>
+      <div class="barra-row">
+        <div class="barra-label">+30 dias</div>
+        <div class="barra-wrap">
+          <div class="barra-bg"><div class="barra-fill" style="width:8%;background:var(--risco)"></div></div>
+          <div class="barra-val">5 alunos — contato imediato (2 são VIP)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-title">Receita Perdida por Evasão</div>
+    <div class="kpi-grid">
+      <div class="kpi risco">
+        <div class="kpi-label">Fevereiro</div>
+        <div class="kpi-value" style="font-size:18px">R$17.493</div>
+        <div class="kpi-delta delta-down">31,6% da receita</div>
+      </div>
+      <div class="kpi risco">
+        <div class="kpi-label">Março</div>
+        <div class="kpi-value" style="font-size:18px">R$10.422</div>
+        <div class="kpi-delta delta-down">29,2% da receita</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB PERFIL -->
+  <div class="section" id="perfil">
+    <div class="sec-title">Visão Geral da Base</div>
+    <div class="kpi-grid three">
+      <div class="kpi">
+        <div class="kpi-label">Total</div>
+        <div class="kpi-value">290</div>
+        <div class="kpi-delta">alunos ativos</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Idade Média</div>
+        <div class="kpi-value">32,7</div>
+        <div class="kpi-delta">anos</div>
+      </div>
+      <div class="kpi accent">
+        <div class="kpi-label">Perfil</div>
+        <div class="kpi-value" style="font-size:14px">Adulto</div>
+        <div class="kpi-delta">equilibrado</div>
+      </div>
+    </div>
+
+    <div class="sec-title">Distribuição por Gênero</div>
+    <div class="card">
+      <div class="donut-wrap">
+        <svg width="100" height="100" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="38" fill="none" stroke="#E8E8E8" stroke-width="14"/>
+          <circle cx="50" cy="50" r="38" fill="none" stroke="#4CAF8A" stroke-width="14"
+            stroke-dasharray="192 197" stroke-dashoffset="0" transform="rotate(-90 50 50)"/>
+          <circle cx="50" cy="50" r="38" fill="none" stroke="#2E6B5E" stroke-width="14"
+            stroke-dasharray="174 215" stroke-dashoffset="-192" transform="rotate(-90 50 50)"/>
+          <text x="50" y="55" text-anchor="middle" font-size="13" font-weight="700" fill="#1A3C34" font-family="DM Mono">290</text>
+        </svg>
+        <div class="donut-legenda">
+          <div class="legenda-item">
+            <div class="legenda-dot" style="background:#4CAF8A"></div>
+            <div class="legenda-nome">Feminino</div>
+            <div class="legenda-pct">52,4%</div>
+          </div>
+          <div class="legenda-item">
+            <div class="legenda-dot" style="background:#2E6B5E"></div>
+            <div class="legenda-nome">Masculino</div>
+            <div class="legenda-pct">47,6%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-title">Distribuição por Faixa Etária</div>
+    <div class="card">
+      <div class="faixa-row">
+        <div class="faixa-label">13–20</div>
+        <div class="faixa-barra"><div class="faixa-fill" style="width:16.9%;background:#4CAF8A"><span class="faixa-pct">17%</span></div></div>
+        <div class="faixa-n">49</div>
+      </div>
+      <div class="faixa-row">
+        <div class="faixa-label">21–30</div>
+        <div class="faixa-barra"><div class="faixa-fill" style="width:31%;background:#2E6B5E"><span class="faixa-pct">31%</span></div></div>
+        <div class="faixa-n">90</div>
+      </div>
+      <div class="faixa-row">
+        <div class="faixa-label">31–40</div>
+        <div class="faixa-barra"><div class="faixa-fill" style="width:21.4%;background:#1A3C34"><span class="faixa-pct">21%</span></div></div>
+        <div class="faixa-n">62</div>
+      </div>
+      <div class="faixa-row">
+        <div class="faixa-label">41–50</div>
+        <div class="faixa-barra"><div class="faixa-fill" style="width:11.7%;background:#F5A623"><span class="faixa-pct">12%</span></div></div>
+        <div class="faixa-n">34</div>
+      </div>
+      <div class="faixa-row">
+        <div class="faixa-label">50+</div>
+        <div class="faixa-barra"><div class="faixa-fill" style="width:11%;background:#8E44AD"><span class="faixa-pct">11%</span></div></div>
+        <div class="faixa-n">32</div>
+      </div>
+    </div>
+
+    <div class="sec-title">Distribuição por Plano</div>
+    <div class="card">
+      <div class="barra-row">
+        <div class="barra-label">Básico</div>
+        <div class="barra-wrap">
+          <div class="barra-bg"><div class="barra-fill" style="width:54.8%;background:var(--risco)"></div></div>
+          <div class="barra-val">54,8% · 159 alunos — alto risco de saída</div>
+        </div>
+      </div>
+      <div class="barra-row">
+        <div class="barra-label">VIP Anual</div>
+        <div class="barra-wrap">
+          <div class="barra-bg"><div class="barra-fill" style="width:21%;background:var(--verde-c)"></div></div>
+          <div class="barra-val">21,0% · 61 alunos — base estável</div>
+        </div>
+      </div>
+      <div class="barra-row">
+        <div class="barra-label">Platinum</div>
+        <div class="barra-wrap">
+          <div class="barra-bg"><div class="barra-fill" style="width:12.1%;background:var(--verde-m)"></div></div>
+          <div class="barra-val">12,1% · 35 alunos</div>
+        </div>
+      </div>
+      <div class="barra-row">
+        <div class="barra-label">Master</div>
+        <div class="barra-wrap">
+          <div class="barra-bg"><div class="barra-fill" style="width:9.7%;background:var(--accent)"></div></div>
+          <div class="barra-val">9,7% · 28 alunos</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-title">Insights Estratégicos</div>
+    <div class="positivo">
+      <div style="font-size:18px">⚖️</div>
+      <div>
+        <div class="positivo-titulo">Distribuição equilibrada entre gêneros</div>
+        <div class="positivo-texto">52% feminino e 48% masculino — rara em academias. Campanhas mistas são mais eficientes que segmentadas.</div>
+      </div>
+    </div>
+    <div class="alerta">
+      <div class="alerta-icon">⚠️</div>
+      <div>
+        <div class="alerta-titulo">54,8% no Plano Básico — risco estrutural</div>
+        <div class="alerta-texto">Mais da metade da base pode sair a qualquer mês. Incentivar migração para Platinum ou Master reduz essa vulnerabilidade.</div>
+      </div>
+    </div>
+    <div class="positivo">
+      <div style="font-size:18px">💎</div>
+      <div>
+        <div class="positivo-titulo">Público 50+ expressivo — oportunidade premium</div>
+        <div class="positivo-texto">32 alunos acima de 50 anos (11% da base). Maior disposição a pagar por programas especializados e menor tendência a cancelar.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB ALERTAS -->
+  <div class="section" id="alertas">
+    <div class="sec-title">Alertas Críticos</div>
+
+    <div class="alerta">
+      <div class="alerta-icon">🔴</div>
+      <div>
+        <div class="alerta-titulo">Churn de 31,6% em fevereiro — 3x acima do limite</div>
+        <div class="alerta-texto">98 contratos encerrados em um único mês. A academia captou bem mas o funil de retenção sangra mais rápido do que a captação repõe.</div>
+      </div>
+    </div>
+
+    <div class="alerta">
+      <div class="alerta-icon">🔴</div>
+      <div>
+        <div class="alerta-titulo">Plano VIP perdeu R$ 3.925 em março (-35,9%)</div>
+        <div class="alerta-texto">São os clientes de maior ticket sendo perdidos sem contato. Cada VIP que sai representa mais de R$895/mês. Investigar renovações que não aconteceram.</div>
+      </div>
+    </div>
+
+    <div class="alerta">
+      <div class="alerta-icon">🔴</div>
+      <div>
+        <div class="alerta-titulo">R$ 27.915 em receita perdida por evasão (2 meses)</div>
+        <div class="alerta-texto">Contato proativo 5 dias antes do vencimento pode recuperar R$3.500–5.200/mês. Ação imediata de alto retorno.</div>
+      </div>
+    </div>
+
+    <div class="alerta">
+      <div class="alerta-icon">⚠️</div>
+      <div>
+        <div class="alerta-titulo">5 alunos sem presença há +30 dias (2 são VIP)</div>
+        <div class="alerta-texto">Contato personalizado imediato pode evitar perda de R$895+ em receita mensal. Prioridade máxima esta semana.</div>
+      </div>
+    </div>
+
+    <div class="alerta">
+      <div class="alerta-icon">⚠️</div>
+      <div>
+        <div class="alerta-titulo">Boleto quase dobrou em março</div>
+        <div class="alerta-texto">De R$1.298 para R$2.676 — sinal de inadimplência potencial. Monitorar vencimentos e criar incentivo para migração ao Pix.</div>
+      </div>
+    </div>
+
+    <div class="sec-title">Pontos Positivos</div>
+
+    <div class="positivo">
+      <div style="font-size:18px">✅</div>
+      <div>
+        <div class="positivo-titulo">Março reverteu o saldo negativo</div>
+        <div class="positivo-texto">Saldo líquido passou de -31 (fev) para +8 (mar). Renovações cresceram +25. A tendência está melhorando.</div>
+      </div>
+    </div>
+
+    <div class="positivo">
+      <div style="font-size:18px">✅</div>
+      <div>
+        <div class="positivo-titulo">Taxa de recuperação de 65,9% — acima da meta</div>
+        <div class="positivo-texto">Meta é 20%. A Soulfit está recuperando bem os ex-alunos que são contactados. O problema não é reativação — é retenção.</div>
+      </div>
+    </div>
+
+    <div class="positivo">
+      <div style="font-size:18px">✅</div>
+      <div>
+        <div class="positivo-titulo">Encerramentos caíram de 98 para 83 em março</div>
+        <div class="positivo-texto">Melhora real de -15,3%. A direção é correta — agora é preciso acelerar esse movimento com o protocolo de retenção.</div>
+      </div>
+    </div>
+
+    <div class="positivo">
+      <div style="font-size:18px">✅</div>
+      <div>
+        <div class="positivo-titulo">Pix crescendo para 38,6% das transações</div>
+        <div class="positivo-texto">Melhora na rastreabilidade financeira. Criar incentivo para migração do dinheiro e boleto para Pix reduz inadimplência.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Ecossistema IA Fitness™ · Método Lucro Invisível · Consultor Sherley Ferreira · Abril 2026
+</div>
+
+<script>
+function showTab(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>
